@@ -47,6 +47,24 @@ public class Main implements IXposedHookZygoteInit {
             hookedMethods++;
         }
 
+        for (Method method : findClass("com.android.org.conscrypt.ConscryptFileDescriptorSocket", null).getDeclaredMethods()) {
+            if (method.getName().equals("verifyCertificateChain")) {
+                List<Object> params = new ArrayList<>();
+                params.addAll(Arrays.asList(method.getParameterTypes()));
+                params.add(new XC_MethodReplacement() {
+                    @Override
+                    protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                        return null;
+                    }
+                });
+                XposedBridge.log("Hooking method:");
+                XposedBridge.log(method.toString());
+                findAndHookMethod("com.android.org.conscrypt.ConscryptFileDescriptorSocket", null, "verifyCertificateChain", params.toArray());
+                hookedMethods++;
+
+            }
+        }
+
         XposedBridge.log(String.format(Locale.ENGLISH, "TrustMeAlready loaded! Hooked %d methods", hookedMethods));
     }
 
