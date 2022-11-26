@@ -3,10 +3,10 @@ An Xposed module to disable SSL verification and pinning on Android using the ex
 
 ### Requirements
 * An Xposed-compatible hooking system. 
-    * [LSPosed](https://github.com/LSPosed/LSPosed) (Android 12)  
+    * [LSPosed](https://github.com/LSPosed/LSPosed) (Android 13)  
 
 ### Tested
-* Android 12.0, ARM64, LSPosed 1.8.3
+* Android 13.0, ARM64, LSPosed 1.8.5
 
 ### Troubleshooting
 * Some apps implement custom certificate checking, bypassing this hook. Try sniffing Chrome traffic, if you don't get an invalid certificate error then this module is working as it should
