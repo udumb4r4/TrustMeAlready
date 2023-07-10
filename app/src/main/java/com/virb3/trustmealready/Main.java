@@ -1,19 +1,25 @@
 package com.virb3.trustmealready;
 
+import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
+import static de.robv.android.xposed.XposedHelpers.findClass;
+
+import com.virb3.trustmealready.CustomClass.TrustManager;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import javax.net.ssl.KeyManager;
+
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
-
-import static de.robv.android.xposed.XposedHelpers.*;
 
 public class Main implements IXposedHookZygoteInit {
 
@@ -61,7 +67,51 @@ public class Main implements IXposedHookZygoteInit {
                 XposedBridge.log(method.toString());
                 findAndHookMethod("com.android.org.conscrypt.ConscryptFileDescriptorSocket", null, "verifyCertificateChain", params.toArray());
                 hookedMethods++;
+            }
+        }
 
+        for (Method method : findClass("javax.net.ssl.HttpsURLConnection", null).getDeclaredMethods()) {
+            switch (method.getName()) {
+                case "setDefaultHostnameVerifier":
+                    XposedBridge.log("setDefaultHostnameVerifier");
+                    break;
+                case "setSSLSocketFactory":
+                    XposedBridge.log("setSSLSocketFactory");
+                    break;
+                case "setHostnameVerifier":
+                    XposedBridge.log("setHostnameVerifier");
+                    break;
+            }
+        }
+
+        for (Method method : findClass("javax.net.ssl.SSLContext", null).getDeclaredMethods()) {
+            if ("init".equals(method.getName())) {
+                XposedBridge.log("init");
+
+                List<Object> params = new ArrayList<>();
+                params.addAll(Arrays.asList(method.getParameterTypes()));
+                params.add(new XC_MethodReplacement() {
+                    @Override
+                    protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                        // Obtiene los argumentos del método original
+                        KeyManager[] keyManagers = (KeyManager[]) param.args[0];
+                        TrustManager[] originalTrustManagers = (TrustManager[]) param.args[1];
+                        SecureRandom secureRandom = (SecureRandom) param.args[2];
+
+                        // Crea un nuevo TrustManager personalizado
+                        TrustManager[] customTrustManagers = new TrustManager[]{new TrustManager()};
+
+                        // Reemplaza los TrustManagers originales con el TrustManager personalizado
+                        param.args[1] = customTrustManagers;
+
+                        // Llama al método original con los argumentos modificados
+                        return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args);
+                    }
+                });
+                XposedBridge.log("Hooking method:");
+                XposedBridge.log(method.toString());
+                findAndHookMethod("javax.net.ssl.SSLContext", null, "init", params.toArray());
+                hookedMethods++;
             }
         }
 
@@ -86,10 +136,6 @@ public class Main implements IXposedHookZygoteInit {
 
         // check parameter type
         Type[] args = ((ParameterizedType) returnType).getActualTypeArguments();
-        if (args.length != 1 || !(args[0].equals(SSL_RETURN_PARAM_TYPE))) {
-            return false;
-        }
-
-        return true;
+        return args.length == 1 && args[0].equals(SSL_RETURN_PARAM_TYPE);
     }
 }
