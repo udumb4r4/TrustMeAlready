@@ -3,11 +3,11 @@ apply plugin: 'com.android.application'
 android {
     compileSdk 33
     defaultConfig {
-        applicationId 'com.soup.trustmealready'
+        applicationId 'com.hato.trustmealready'
         minSdkVersion 15
         targetSdk 33
-        versionCode 6
-        versionName '1.16'
+        versionCode 7
+        versionName '1.17'
     }
         buildTypes {
         release {
@@ -15,8 +15,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    namespace 'com.virb3.trustmealready'
-    buildToolsVersion '33.0.0'
+    namespace 'com.hato.trustmealready'
 }
 
 dependencies {

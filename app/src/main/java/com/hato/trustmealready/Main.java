@@ -1,9 +1,9 @@
-package com.virb3.trustmealready;
+package com.hato.trustmealready;
 
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 
-import com.virb3.trustmealready.CustomClass.TrustManager;
+import com.hato.trustmealready.CustomClass.TrustManager;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
