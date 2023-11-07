@@ -6,8 +6,8 @@ android {
         applicationId 'com.hato.trustmealready'
         minSdkVersion 15
         targetSdk 34
-        versionCode 8
-        versionName '1.18'
+        versionCode 9
+        versionName '1.19'
     }
         buildTypes {
         release {

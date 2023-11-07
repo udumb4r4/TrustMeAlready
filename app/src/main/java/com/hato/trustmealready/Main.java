@@ -71,23 +71,26 @@ public class Main implements IXposedHookZygoteInit {
         }
 
         for (Method method : findClass("javax.net.ssl.HttpsURLConnection", null).getDeclaredMethods()) {
-            switch (method.getName()) {
-                case "setDefaultHostnameVerifier":
-                    XposedBridge.log("setDefaultHostnameVerifier");
-                    break;
-                case "setSSLSocketFactory":
-                    XposedBridge.log("setSSLSocketFactory");
-                    break;
-                case "setHostnameVerifier":
-                    XposedBridge.log("setHostnameVerifier");
-                    break;
+            String name = method.getName();
+            if (name.equals("setHostnameVerifier") || name.equals("setSSLSocketFactory") || name.equals("setDefaultHostnameVerifier")) {
+                List<Object> params = new ArrayList<>();
+                params.addAll(Arrays.asList(method.getParameterTypes()));
+                params.add(new XC_MethodReplacement() {
+                    @Override
+                    protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                        return null;
+                    }
+                });
+                XposedBridge.log("Hooking method:");
+                XposedBridge.log(method.toString());
+                findAndHookMethod("javax.net.ssl.HttpsURLConnection", null,
+                        method.getName(), params.toArray());
+                hookedMethods++;
             }
         }
 
         for (Method method : findClass("javax.net.ssl.SSLContext", null).getDeclaredMethods()) {
             if ("init".equals(method.getName())) {
-                XposedBridge.log("init");
-
                 List<Object> params = new ArrayList<>();
                 params.addAll(Arrays.asList(method.getParameterTypes()));
                 params.add(new XC_MethodReplacement() {
