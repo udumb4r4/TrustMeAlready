@@ -95,11 +95,12 @@ public class Main implements IXposedHookZygoteInit {
                     protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                         // Obtiene los argumentos del método original
                         KeyManager[] keyManagers = (KeyManager[]) param.args[0];
-                        TrustManager[] originalTrustManagers = (TrustManager[]) param.args[1];
+                        javax.net.ssl.TrustManager[] originalTrustManagers = (javax.net.ssl.TrustManager[]) param.args[1];
                         SecureRandom secureRandom = (SecureRandom) param.args[2];
 
                         // Crea un nuevo TrustManager personalizado
-                        TrustManager[] customTrustManagers = new TrustManager[]{new TrustManager()};
+                        TrustManager[] customTrustManagers = new com.hato.trustmealready.CustomClass.TrustManager[]
+                                { new com.hato.trustmealready.CustomClass.TrustManager() };
 
                         // Reemplaza los TrustManagers originales con el TrustManager personalizado
                         param.args[1] = customTrustManagers;
